@@ -30,6 +30,8 @@ class GolController(
         require(rows > 0) { "Rows must be greater than 0" }
         require(birthRule.size == 9) { "Birth rule must be of size 9" }
         require(surviveRule.size == 9) { "Survive rule must be of size 9" }
+        println("birthRule: ${birthRule.joinToString()}")
+        println("surviveRule: ${surviveRule.joinToString()}")
     }
 
     fun getCell(
@@ -38,17 +40,20 @@ class GolController(
     ): Boolean = grid[rowIndex][columnIndex]
 
     fun update() {
-        for (rowIndex in 0 until rows) {
-            for (columnIndex in 0 until columns) {
-                val cell = grid[rowIndex][columnIndex]
-                val liveNeighbours = countLiveNeighbours(rowIndex, columnIndex)
-                if (cell) {
-                    grid[rowIndex][columnIndex] = surviveRule[liveNeighbours]
-                } else {
-                    grid[rowIndex][columnIndex] = birthRule[liveNeighbours]
+        // n.b. if trying to avoid new Array allocation, be sure to not to update current grid for calculations
+        grid =
+            Array(rows) { rowIndex ->
+                BooleanArray(columns) { columnIndex ->
+                    val cell = grid[rowIndex][columnIndex]
+                    val liveNeighbours = countLiveNeighbours(rowIndex, columnIndex)
+
+                    if (cell) {
+                        surviveRule[liveNeighbours]
+                    } else {
+                        birthRule[liveNeighbours]
+                    }
                 }
             }
-        }
     }
 
     private fun countLiveNeighbours(
@@ -68,6 +73,24 @@ class GolController(
             }
         }
         return count
+    }
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+        for (row in grid) {
+            for (cell in row) {
+                sb.append(if (cell) 'A' else '.')
+            }
+            sb.append('\n')
+        }
+        return sb.toString()
+    }
+
+    fun toggleCell(
+        colIndex: Int,
+        rowIndex: Int,
+    ) {
+        grid[rowIndex][colIndex] = !grid[rowIndex][colIndex]
     }
 }
 
