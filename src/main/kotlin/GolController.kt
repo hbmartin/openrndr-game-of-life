@@ -1,5 +1,8 @@
 import kotlin.random.Random
 
+private const val RULE_SIZE = 9
+private val NEIGHBOR_RANGE = -1..1
+
 class GolController(
     private val rows: Int,
     private val columns: Int,
@@ -7,11 +10,6 @@ class GolController(
     private val surviveRule: BooleanArray,
     initialPattern: Array<BooleanArray>?,
 ) {
-    private var grid: Array<BooleanArray> =
-        initialPattern?.let {
-            centerShape(it, rows, columns)
-        } ?: randomGrid(rows, columns)
-
     constructor(
         rows: Int,
         columns: Int,
@@ -25,19 +23,18 @@ class GolController(
         initialPattern = initialPattern?.let { parsePattern(it) },
     )
 
+    @Suppress("AvoidVarsExceptWithDelegate")
+    private var grid: Array<BooleanArray> =
+        initialPattern?.let {
+            centerPattern(it, rows, columns)
+        } ?: randomGrid(rows, columns)
+
     init {
         require(columns > 0) { "Columns must be greater than 0" }
         require(rows > 0) { "Rows must be greater than 0" }
-        require(birthRule.size == 9) { "Birth rule must be of size 9" }
-        require(surviveRule.size == 9) { "Survive rule must be of size 9" }
-        println("birthRule: ${birthRule.joinToString()}")
-        println("surviveRule: ${surviveRule.joinToString()}")
+        require(birthRule.size == RULE_SIZE) { "Birth rule must be of size $RULE_SIZE" }
+        require(surviveRule.size == RULE_SIZE) { "Survive rule must be of size $RULE_SIZE" }
     }
-
-    fun getCell(
-        columnIndex: Int,
-        rowIndex: Int,
-    ): Boolean = grid[rowIndex][columnIndex]
 
     fun update() {
         // n.b. if trying to avoid new Array allocation, be sure to not to update current grid for calculations
@@ -59,70 +56,71 @@ class GolController(
     private fun countLiveNeighbours(
         rowIndex: Int,
         columnIndex: Int,
-    ): Int {
-        var count = 0
-        for (y in -1..1) {
-            for (x in -1..1) {
-                if (x == 0 && y == 0) continue
-                val neighbourRowIndex = wrappedIndex(rowIndex + y, rows)
-                val neighbourColumnIndex = wrappedIndex(columnIndex + x, columns)
+    ): Int =
+        NEIGHBOR_RANGE
+            .flatMap { y ->
+                NEIGHBOR_RANGE.map { x ->
+                    if (x == 0 && y == 0) {
+                        0
+                    } else {
+                        val neighbourRowIndex = wrappedIndex(rowIndex + y, rows)
+                        val neighbourColumnIndex = wrappedIndex(columnIndex + x, columns)
 
-                if (grid[neighbourRowIndex][neighbourColumnIndex]) {
-                    count++
+                        if (grid[neighbourRowIndex][neighbourColumnIndex]) {
+                            1
+                        } else {
+                            0
+                        }
+                    }
                 }
-            }
-        }
-        return count
-    }
-
-    override fun toString(): String {
-        val sb = StringBuilder()
-        for (row in grid) {
-            for (cell in row) {
-                sb.append(if (cell) 'A' else '.')
-            }
-            sb.append('\n')
-        }
-        return sb.toString()
-    }
+            }.sum()
 
     fun toggleCell(
-        colIndex: Int,
         rowIndex: Int,
+        colIndex: Int,
     ) {
         grid[rowIndex][colIndex] = !grid[rowIndex][colIndex]
     }
+
+    operator fun get(coords: Pair<Int, Int>): Boolean = grid[coords.first][coords.second]
+
+    override fun toString(): String =
+        grid.joinToString("$") {
+            it.joinToString("") { cell -> if (cell) "A" else "." }
+        }
 }
 
 private fun String.toBirthRule(): BooleanArray {
     val rule = this.substringAfter("B").substringBefore("/")
-    return BooleanArray(9) { it.toString() in rule }
+    return BooleanArray(RULE_SIZE) { it.toString() in rule }
 }
 
 private fun String.toSurviveRule(): BooleanArray {
     val rule = this.substringAfter("S")
-    return BooleanArray(9) { it.toString() in rule }
+    return BooleanArray(RULE_SIZE) { it.toString() in rule }
 }
 
-private fun centerShape(
-    initialShape: Array<BooleanArray>,
+private fun centerPattern(
+    initialPattern: Array<BooleanArray>,
     rows: Int,
     columns: Int,
 ): Array<BooleanArray> {
-    require(initialShape.isNotEmpty()) { "Initial shape cannot be empty" }
-    require(initialShape.size <= rows) { "Initial shape is too tall (${initialShape.size} > $rows)" }
-    require(initialShape[0].isNotEmpty()) { "Initial shape has 0 width columns" }
-    val height = initialShape.size
-    val width = requireNotNull(initialShape.map { it.size }.maxOrNull())
+    require(initialPattern.isNotEmpty()) { "Initial shape cannot be empty" }
+    require(initialPattern.size <= rows) { "Initial shape is too tall (${initialPattern.size} > $rows)" }
+    require(initialPattern[0].isNotEmpty()) { "Initial shape has 0 width columns" }
+
+    val height = initialPattern.size
+    val width = requireNotNull(initialPattern.maxOfOrNull { it.size })
     require(width <= columns) { "Initial shape is too wide ($width > $columns)" }
     val startRow = (rows - height) / 2
     val startColumn = (columns - width) / 2
+
     return Array(rows) { rowIndex ->
         BooleanArray(columns) { columnIndex ->
             if (rowIndex in startRow until startRow + height &&
                 columnIndex in startColumn until startColumn + width
             ) {
-                initialShape[rowIndex - startRow]
+                initialPattern[rowIndex - startRow]
                     .getOrElse(columnIndex - startColumn) { false }
             } else {
                 false
@@ -153,6 +151,7 @@ private fun wrappedIndex(
 
 // Function to convert RLE syntax to a 2D array of booleans
 // eg. A.A$3.A$3.A$A2.A$.3A!
+@Suppress("AvoidMutableCollections")
 private fun parsePattern(pattern: String): Array<BooleanArray> {
     require(pattern.isNotEmpty()) { "Pattern cannot be empty" }
     val illegalChar = pattern.find { it !in "Ao.b0123456789$!" }
@@ -162,6 +161,8 @@ private fun parsePattern(pattern: String): Array<BooleanArray> {
     for (pRow in patternRows) {
         if (pRow.isEmpty()) continue
         val parsed = mutableListOf<Boolean>()
+
+        @Suppress("AvoidVarsExceptWithDelegate")
         var multiplier = 1
         for (char in pRow) {
             when {

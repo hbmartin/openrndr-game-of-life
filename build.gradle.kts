@@ -3,10 +3,10 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "org.openrndr.template"
+group = "me.haroldmartin.gameoflife"
 version = "1.0.0"
 
-val applicationMainClass = "TemplateProgramKt"
+val applicationMainClass = "GameOfLifeKt"
 
 /**  ## additional ORX features to be added to this project */
 val orxFeatures =
@@ -33,7 +33,7 @@ val orxFeatures =
 //  "orx-integral-image",
 //  "orx-interval-tree",
 //  "orx-jumpflood",
-//  "orx-kdtree",
+        "orx-kdtree",
 //  "orx-keyframer",
 //  "orx-kinect-v1",
 //  "orx-kotlin-parser",
@@ -104,6 +104,7 @@ plugins {
     alias(libs.plugins.runtime)
     alias(libs.plugins.gitarchive.tomarkdown).apply(false)
     alias(libs.plugins.versions)
+    alias(libs.plugins.detekt)
 }
 
 repositories {
@@ -136,6 +137,8 @@ dependencies {
         }
     }
     implementation(kotlin("stdlib-jdk8"))
+    detektPlugins(rootProject.libs.detekt.formatting)
+    detektPlugins("me.haroldmartin:hbmartin-detekt-rules:0.1.6")
     testImplementation(libs.junit)
 }
 
@@ -363,4 +366,12 @@ if (properties["openrndr.tasks"] == "true") {
             }
         }
     }
+}
+
+tasks.named("check").configure {
+    this.setDependsOn(
+        this.dependsOn.filterNot {
+            it is TaskProvider<*> && it.name == "detekt"
+        } + tasks.named("detektMain"),
+    )
 }

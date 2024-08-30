@@ -1,9 +1,10 @@
 import kotlinx.coroutines.delay
+import org.openrndr.Program
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.shapes.grid
 import org.openrndr.launch
-import org.openrndr.math.Vector2
+import org.openrndr.shape.Rectangle
 import kotlin.math.max
 
 private const val COLUMNS = 100
@@ -12,14 +13,10 @@ private const val UPDATE_ON_CLICK = false
 private const val DELAY_CHANGE_ON_SCROLL: Long = 50
 private const val MARGIN = 1.0
 private const val GUTTER = 0.5
-private var delayTimeMillis: Long = 300
+private const val WINDOW_SIZE = 1000
 
-suspend fun GolController.loopUpdate() {
-    while (true) {
-        delay(delayTimeMillis)
-        update()
-    }
-}
+@Suppress("AvoidVarsExceptWithDelegate")
+private var delayTimeMillis: Long = 300
 
 fun main() =
     application {
@@ -31,13 +28,11 @@ fun main() =
             )
 
         configure {
-            width = 1000
-            height = 1000
-            windowResizable = true
+            width = WINDOW_SIZE
+            height = WINDOW_SIZE
+//            windowResizable = true
             title = "Game of Life"
         }
-
-        val isDragging: MutableList<Vector2> = mutableListOf()
 
         program {
             if (UPDATE_ON_CLICK) {
@@ -48,26 +43,21 @@ fun main() =
                 launch {
                     controller.loopUpdate()
                 }
+
                 mouse.buttonUp.listen { event ->
-                    println("mouse.buttonUp: $event")
-                    isDragging.add(event.position)
-                    println(isDragging)
-                    drawer.bounds
-                        .grid(COLUMNS, ROWS, MARGIN, MARGIN, GUTTER, GUTTER)
-                        .mapIndexed { rowIndex, row ->
-                            row.mapIndexed { colIndex, rect ->
-                                if (isDragging.any { rect.contains(it) }) {
-                                    controller.toggleCell(colIndex, rowIndex)
-                                }
-                            }
+                    grid.each { rowIndex, colIndex, rect ->
+                        if (rect.contains(event.position)) {
+                            controller.toggleCell(rowIndex = rowIndex, colIndex = colIndex)
+                            return@each
                         }
-                    isDragging.clear()
+                    }
                 }
-                mouse.dragged.listen {
-                    println("mouse.draggylicious: $it")
-                    isDragging.apply {
-                        add(it.position)
-                        add(it.position + it.dragDisplacement)
+                mouse.dragged.listen { event ->
+                    val targetPosition = event.position + event.dragDisplacement
+                    grid.each { rowIndex, colIndex, rect ->
+                        if (rect.contains(event.position) || rect.contains(targetPosition)) {
+                            controller.toggleCell(rowIndex = rowIndex, colIndex = colIndex)
+                        }
                     }
                 }
             }
@@ -87,16 +77,35 @@ fun main() =
                 drawer.fill = ColorRGBa.WHITE
                 drawer.stroke = null
                 drawer.rectangles {
-                    drawer.bounds
-                        .grid(COLUMNS, ROWS, MARGIN, MARGIN, GUTTER, GUTTER)
-                        .forEachIndexed { rowIndex, row ->
-                            row.forEachIndexed { columnIndex, rect ->
-                                if (controller.getCell(columnIndex, rowIndex)) {
-                                    rectangle(rect)
-                                }
-                            }
+                    grid.each { rowIndex, columnIndex, rect ->
+                        if (controller[rowIndex to columnIndex]) {
+                            rectangle(rect)
                         }
+                    }
                 }
             }
         }
     }
+
+private val Program.grid
+    get() = drawer.bounds.grid(COLUMNS, ROWS, MARGIN, MARGIN, GUTTER, GUTTER)
+
+private fun List<List<Rectangle>>.each(block: (Int, Int, Rectangle) -> Unit) {
+    forEachIndexed { rowIndex, row ->
+        row.forEachIndexed { colIndex, rect ->
+            block(rowIndex, colIndex, rect)
+        }
+    }
+}
+
+private suspend fun GolController.loopUpdate() {
+    while (true) {
+        if (delayTimeMillis > 0) {
+            delay(delayTimeMillis)
+            update()
+        } else {
+            @Suppress("MagicNumber")
+            delay(500L)
+        }
+    }
+}

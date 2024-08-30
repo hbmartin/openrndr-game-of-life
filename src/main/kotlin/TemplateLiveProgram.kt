@@ -9,14 +9,17 @@ import org.openrndr.extra.olive.oliveProgram
  *  oliveProgram {} can be changed while the program is running.
  */
 
-fun main() = application {
-    configure {
-        width = 800
-        height = 800
-    }
-    oliveProgram {
-        extend {
-            drawer.clear(ColorRGBa.PINK)
+private const val WINDOW_SIZE = 800
+
+fun main() =
+    application {
+        configure {
+            width = WINDOW_SIZE
+            height = WINDOW_SIZE
+        }
+        oliveProgram {
+            extend {
+                drawer.clear(ColorRGBa.PINK)
+            }
         }
     }
-}
