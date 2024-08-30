@@ -48,7 +48,7 @@ val orxFeatures =
 //  "orx-osc",
         "orx-palette",
         "orx-panel",
-//  "orx-parameters",
+        "orx-parameters",
 //  "orx-poisson-fill",
 //  "orx-property-watchers",
 //  "orx-quadtree",
@@ -137,6 +137,7 @@ dependencies {
         }
     }
     implementation(kotlin("stdlib-jdk8"))
+    implementation(libs.orx.gui)
     detektPlugins(rootProject.libs.detekt.formatting)
     detektPlugins("me.haroldmartin:hbmartin-detekt-rules:0.1.6")
     testImplementation(libs.junit)

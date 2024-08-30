@@ -75,11 +75,11 @@ class GolController(
                 }
             }.sum()
 
-    fun toggleCell(
+    fun turnOnCell(
         rowIndex: Int,
         colIndex: Int,
     ) {
-        grid[rowIndex][colIndex] = !grid[rowIndex][colIndex]
+        grid[rowIndex][colIndex] = true
     }
 
     operator fun get(coords: Pair<Int, Int>): Boolean = grid[coords.first][coords.second]
@@ -88,15 +88,24 @@ class GolController(
         grid.joinToString("$") {
             it.joinToString("") { cell -> if (cell) "A" else "." }
         }
+
+    fun reset(pattern: Patterns?) {
+        grid =
+            if (pattern != null) {
+                centerPattern(pattern.asArray, rows, columns)
+            } else {
+                randomGrid(rows, columns)
+            }
+    }
 }
 
 private fun String.toBirthRule(): BooleanArray {
-    val rule = this.substringAfter("B").substringBefore("/")
+    val rule = this.uppercase().substringAfter("B").substringBefore("/")
     return BooleanArray(RULE_SIZE) { it.toString() in rule }
 }
 
 private fun String.toSurviveRule(): BooleanArray {
-    val rule = this.substringAfter("S")
+    val rule = this.uppercase().substringAfter("S")
     return BooleanArray(RULE_SIZE) { it.toString() in rule }
 }
 
@@ -164,24 +173,41 @@ private fun parsePattern(pattern: String): Array<BooleanArray> {
 
         @Suppress("AvoidVarsExceptWithDelegate")
         var multiplier = 1
+
+        @Suppress("AvoidVarsExceptWithDelegate")
+        var prevWasDigit = false
         for (char in pRow) {
             when {
-                char.isDigit() -> multiplier = char.toString().toInt()
+                char.isDigit() -> {
+                    multiplier =
+                        if (prevWasDigit) {
+                            multiplier * 10 + char.toString().toInt()
+                        } else {
+                            char.toString().toInt()
+                        }
+                    prevWasDigit = true
+                }
                 char == '.' || char == 'b' -> {
                     repeat(multiplier) {
                         parsed.add(false)
                     }
                     multiplier = 1
+                    prevWasDigit = false
                 }
                 char == 'A' || char == 'o' -> {
                     repeat(multiplier) {
                         parsed.add(true)
                     }
                     multiplier = 1
+                    prevWasDigit = false
                 }
+                else -> prevWasDigit = false
             }
         }
         rows.add(parsed.toBooleanArray())
     }
     return rows.toTypedArray()
 }
+
+private val Patterns.asArray: Array<BooleanArray>
+    get() = parsePattern(value)

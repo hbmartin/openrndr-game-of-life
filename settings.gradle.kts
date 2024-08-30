@@ -1,4 +1,4 @@
-rootProject.name = "openrndr-template"
+rootProject.name = "openrndr-game-of-life"
 
 pluginManagement {
     repositories {
