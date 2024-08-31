@@ -5,9 +5,9 @@ orx = "0.4.4"
 orml = "0.4.1"
 detekt = "1.23.6"
 
-slf4j = "2.0.10"
-log4j = "2.22.1"
-jackson = "2.16.1"
+slf4j = "2.0.16"
+log4j = "2.23.1"
+jackson = "2.17.2"
 
 [libraries]
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
@@ -34,6 +34,6 @@ detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-form
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 gitarchive-tomarkdown = { id = "org.openrndr.extra.gitarchiver.tomarkdown", version.ref = "orx" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-runtime = { id = "org.beryx.runtime", version = "1.13.0" }
+runtime = { id = "org.beryx.runtime", version = "1.13.1" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-versions = { id = "com.github.ben-manes.versions", version = "0.50.0" }
+versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
