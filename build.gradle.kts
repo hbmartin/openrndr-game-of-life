@@ -368,7 +368,9 @@ if (properties["openrndr.tasks"] == "true") {
         }
     }
 }
-
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    this.jvmTarget = JavaVersion.VERSION_21.toString()
+}
 tasks.named("check").configure {
     this.setDependsOn(
         this.dependsOn.filterNot {

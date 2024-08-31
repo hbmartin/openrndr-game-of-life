@@ -51,6 +51,7 @@ fun main() =
             gui.compartmentsCollapsedByDefault = false
 
             val settings =
+                @Suppress("VarCouldBeVal")
                 @Description("Settings")
                 object {
                     @ColorParameter("Background", order = 0)
@@ -68,7 +69,7 @@ fun main() =
                     }
                 }
             gui.add(settings)
-            gui.onChange { name, value ->
+            gui.onChange { _, value ->
                 (value as? Patterns)?.let {
                     pattern = it
                 }
