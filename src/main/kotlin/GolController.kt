@@ -41,10 +41,10 @@ class GolController(
         grid =
             Array(rows) { rowIndex ->
                 BooleanArray(columns) { columnIndex ->
-                    val cell = grid[rowIndex][columnIndex]
+                    val isCellAlive = grid[rowIndex][columnIndex]
                     val liveNeighbours = countLiveNeighbours(rowIndex, columnIndex)
 
-                    if (cell) {
+                    if (isCellAlive) {
                         surviveRule[liveNeighbours]
                     } else {
                         birthRule[liveNeighbours]
@@ -73,7 +73,8 @@ class GolController(
                         }
                     }
                 }
-            }.sum()
+            }
+            .sum()
 
     fun turnOnCell(
         rowIndex: Int,
@@ -160,53 +161,60 @@ private fun wrappedIndex(
 
 // Function to convert RLE syntax to a 2D array of booleans
 // eg. A.A$3.A$3.A$A2.A$.3A!
-@Suppress("AvoidMutableCollections")
 private fun parsePattern(pattern: String): Array<BooleanArray> {
     require(pattern.isNotEmpty()) { "Pattern cannot be empty" }
     val illegalChar = pattern.find { it !in "Ao.b0123456789$!" }
+    @Suppress("NullableToStringCall")
     require(illegalChar == null) { "Illegal character in pattern: $illegalChar" }
-    val rows = mutableListOf<BooleanArray>()
-    val patternRows = pattern.split('$')
-    for (pRow in patternRows) {
-        if (pRow.isEmpty()) continue
-        val parsed = mutableListOf<Boolean>()
+    return pattern.split('$').mapNotNull { parseRow(it) }.toTypedArray()
+}
 
-        @Suppress("AvoidVarsExceptWithDelegate")
-        var multiplier = 1
+@Suppress("AvoidMutableCollections")
+private fun parseRow(pRow: String): BooleanArray? {
+    if (pRow.isEmpty()) return null
 
-        @Suppress("AvoidVarsExceptWithDelegate")
-        var prevWasDigit = false
-        for (char in pRow) {
-            when {
-                char.isDigit() -> {
-                    multiplier =
-                        if (prevWasDigit) {
-                            multiplier * 10 + char.toString().toInt()
-                        } else {
-                            char.toString().toInt()
-                        }
-                    prevWasDigit = true
-                }
-                char == '.' || char == 'b' -> {
-                    repeat(multiplier) {
-                        parsed.add(false)
+    val parsed = mutableListOf<Boolean>()
+
+    @Suppress("AvoidVarsExceptWithDelegate")
+    var multiplier = 1
+
+    @Suppress("AvoidVarsExceptWithDelegate")
+    var prevWasDigit = false
+    for (char in pRow) {
+        when {
+            char.isDigit() -> {
+                multiplier =
+                    if (prevWasDigit) {
+                        @Suppress("MagicNumber")
+                        multiplier * 10 + char.toString().toInt()
+                    } else {
+                        char.toString().toInt()
                     }
-                    multiplier = 1
-                    prevWasDigit = false
+                prevWasDigit = true
+            }
+
+            char == '.' || char == 'b' -> {
+                repeat(multiplier) {
+                    parsed.add(false)
                 }
-                char == 'A' || char == 'o' -> {
-                    repeat(multiplier) {
-                        parsed.add(true)
-                    }
-                    multiplier = 1
-                    prevWasDigit = false
+                multiplier = 1
+                prevWasDigit = false
+            }
+
+            char == 'A' || char == 'o' -> {
+                repeat(multiplier) {
+                    parsed.add(true)
                 }
-                else -> prevWasDigit = false
+                multiplier = 1
+                prevWasDigit = false
+            }
+
+            else -> {
+                prevWasDigit = false
             }
         }
-        rows.add(parsed.toBooleanArray())
     }
-    return rows.toTypedArray()
+    return parsed.toBooleanArray()
 }
 
 private val Patterns.asArray: Array<BooleanArray>

@@ -6,7 +6,6 @@ import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.gui.GUI
 import org.openrndr.extra.parameters.ActionParameter
-import org.openrndr.extra.parameters.BooleanParameter
 import org.openrndr.extra.parameters.ColorParameter
 import org.openrndr.extra.parameters.Description
 import org.openrndr.extra.parameters.OptionParameter
@@ -26,8 +25,9 @@ private val DEFAULT_PATTERN = Patterns.PERIOD_52_GLIDER_GUN
 @Suppress("AvoidVarsExceptWithDelegate")
 private var delayTimeMillis: Long = DEFAULT_DELAY
 
-var pattern = DEFAULT_PATTERN
-val controller =
+@Suppress("AvoidVarsExceptWithDelegate")
+private var pattern = DEFAULT_PATTERN
+private val controller =
     GolController(
         rows = COLUMNS,
         columns = ROWS,
@@ -51,14 +51,11 @@ fun main() =
             gui.compartmentsCollapsedByDefault = false
 
             val settings =
-                @Suppress("VarCouldBeVal")
+                @Suppress("VarCouldBeVal", "AvoidVarsExceptWithDelegate")
                 @Description("Settings")
                 object {
                     @ColorParameter("Background", order = 0)
                     var color = ColorRGBa.PINK
-
-                    @BooleanParameter("option", order = 1)
-                    var b = false
 
                     @OptionParameter("\n", order = 99)
                     var pattern: Patterns = DEFAULT_PATTERN
@@ -83,20 +80,11 @@ fun main() =
                 when (it.key) {
                     KEY_SPACEBAR -> delayTimeMillis = if (delayTimeMillis > 0) 0 else DEFAULT_DELAY
                     KEY_ESCAPE -> controller.reset(pattern)
-                    else ->
-                        when (it.name) {
-                            "." -> gui.visible = !gui.visible
-                            "," -> gui.visible = !gui.visible
-                            "r" -> controller.reset(Patterns.entries.random())
-//                "R" -> controller.randomize()
-//                "C" -> controller.clear()
-//                "S" -> controller.step()
-//                "P" -> controller.togglePause()
-//                "Q" -> controller.toggleRule()
-//                "UP" -> controller.increaseSpeed()
-//                "DOWN" -> controller.decreaseSpeed()
-                            else -> Unit
-                        }
+                    else -> when (it.name) {
+                        "." -> gui.visible = !gui.visible
+                        "," -> gui.visible = !gui.visible
+                        "r" -> controller.reset(Patterns.entries.random())
+                    }
                 }
             }
 
@@ -115,6 +103,7 @@ fun main() =
         }
     }
 
+@Suppress("LabeledExpression")
 private fun Program.listenToMouseEvents(gui: GUI) {
     mouse.buttonUp.listen { event ->
         if (gui.visible) return@listen
@@ -134,9 +123,9 @@ private fun Program.listenToMouseEvents(gui: GUI) {
             }
         }
     }
-    mouse.scrolled.listen {
+    mouse.scrolled.listen { event ->
         delayTimeMillis =
-            if (it.rotation.y < 0) {
+            if (event.rotation.y < 0) {
                 delayTimeMillis + DELAY_CHANGE_ON_SCROLL
             } else {
                 (delayTimeMillis - DELAY_CHANGE_ON_SCROLL).coerceAtLeast(DELAY_CHANGE_ON_SCROLL)
@@ -145,7 +134,14 @@ private fun Program.listenToMouseEvents(gui: GUI) {
 }
 
 private val Program.grid
-    get() = drawer.bounds.grid(COLUMNS, ROWS, MARGIN, MARGIN, GUTTER, GUTTER)
+    get() = drawer.bounds.grid(
+        columns = COLUMNS,
+        rows = ROWS,
+        marginX = MARGIN,
+        marginY = MARGIN,
+        gutterX = GUTTER,
+        gutterY = GUTTER,
+    )
 
 private fun List<List<Rectangle>>.each(block: (Int, Int, Rectangle) -> Unit) {
     forEachIndexed { rowIndex, row ->
