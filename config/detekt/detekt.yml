@@ -848,7 +848,7 @@ formatting:
     autoCorrect: true
     maxLineLength: 120
   FunctionSignature:
-    active: true
+    active: false
     autoCorrect: true
     forceMultilineWhenParameterCountGreaterOrEqualThan: 2
     functionBodyExpressionWrapping: 'default'

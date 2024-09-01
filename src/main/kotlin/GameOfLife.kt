@@ -27,7 +27,7 @@ private var delayTimeMillis: Long = DEFAULT_DELAY
 
 @Suppress("AvoidVarsExceptWithDelegate")
 private var pattern = DEFAULT_PATTERN
-private val controller =
+private val CONTROLLER =
     GolController(
         rows = COLUMNS,
         columns = ROWS,
@@ -44,7 +44,7 @@ fun main() =
         }
 
         program {
-            launch { controller.loopUpdate() }
+            launch { CONTROLLER.loopUpdate() }
             val gui = GUI()
             listenToMouseEvents(gui)
 
@@ -62,7 +62,7 @@ fun main() =
 
                     @ActionParameter("Apply", order = 100)
                     fun doApply() {
-                        controller.reset(pattern)
+                        CONTROLLER.reset(pattern)
                     }
                 }
             gui.add(settings)
@@ -79,11 +79,11 @@ fun main() =
             keyboard.keyUp.listen {
                 when (it.key) {
                     KEY_SPACEBAR -> delayTimeMillis = if (delayTimeMillis > 0) 0 else DEFAULT_DELAY
-                    KEY_ESCAPE -> controller.reset(pattern)
+                    KEY_ESCAPE -> CONTROLLER.reset(pattern)
                     else -> when (it.name) {
                         "." -> gui.visible = !gui.visible
                         "," -> gui.visible = !gui.visible
-                        "r" -> controller.reset(Patterns.entries.random())
+                        "r" -> CONTROLLER.reset(Patterns.entries.random())
                     }
                 }
             }
@@ -94,7 +94,7 @@ fun main() =
                 drawer.stroke = null
                 drawer.rectangles {
                     grid.each { rowIndex, columnIndex, rect ->
-                        if (controller[rowIndex to columnIndex]) {
+                        if (CONTROLLER[rowIndex to columnIndex]) {
                             rectangle(rect)
                         }
                     }
@@ -103,13 +103,13 @@ fun main() =
         }
     }
 
-@Suppress("LabeledExpression")
+@Suppress("LabeledExpression", "CognitiveComplexMethod")
 private fun Program.listenToMouseEvents(gui: GUI) {
     mouse.buttonUp.listen { event ->
         if (gui.visible) return@listen
         grid.each { rowIndex, colIndex, rect ->
             if (rect.contains(event.position)) {
-                controller.turnOnCell(rowIndex = rowIndex, colIndex = colIndex)
+                CONTROLLER.turnOnCell(rowIndex = rowIndex, colIndex = colIndex)
                 return@each
             }
         }
@@ -119,7 +119,7 @@ private fun Program.listenToMouseEvents(gui: GUI) {
         val targetPosition = event.position + event.dragDisplacement
         grid.each { rowIndex, colIndex, rect ->
             if (rect.contains(event.position) || rect.contains(targetPosition)) {
-                controller.turnOnCell(rowIndex = rowIndex, colIndex = colIndex)
+                CONTROLLER.turnOnCell(rowIndex = rowIndex, colIndex = colIndex)
             }
         }
     }
@@ -134,14 +134,15 @@ private fun Program.listenToMouseEvents(gui: GUI) {
 }
 
 private val Program.grid
-    get() = drawer.bounds.grid(
-        columns = COLUMNS,
-        rows = ROWS,
-        marginX = MARGIN,
-        marginY = MARGIN,
-        gutterX = GUTTER,
-        gutterY = GUTTER,
-    )
+    get() =
+        drawer.bounds.grid(
+            columns = COLUMNS,
+            rows = ROWS,
+            marginX = MARGIN,
+            marginY = MARGIN,
+            gutterX = GUTTER,
+            gutterY = GUTTER,
+        )
 
 private fun List<List<Rectangle>>.each(block: (Int, Int, Rectangle) -> Unit) {
     forEachIndexed { rowIndex, row ->

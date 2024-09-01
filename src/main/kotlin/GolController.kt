@@ -10,19 +10,6 @@ class GolController(
     private val surviveRule: BooleanArray,
     initialPattern: Array<BooleanArray>?,
 ) {
-    constructor(
-        rows: Int,
-        columns: Int,
-        initialPattern: String? = null,
-        rule: String = "B3/S23",
-    ) : this(
-        rows = rows,
-        columns = columns,
-        birthRule = rule.toBirthRule(),
-        surviveRule = rule.toSurviveRule(),
-        initialPattern = initialPattern?.let { parsePattern(it) },
-    )
-
     @Suppress("AvoidVarsExceptWithDelegate")
     private var grid: Array<BooleanArray> =
         initialPattern?.let {
@@ -35,6 +22,19 @@ class GolController(
         require(birthRule.size == RULE_SIZE) { "Birth rule must be of size $RULE_SIZE" }
         require(surviveRule.size == RULE_SIZE) { "Survive rule must be of size $RULE_SIZE" }
     }
+
+    constructor(
+        rows: Int,
+        columns: Int,
+        initialPattern: String? = null,
+        rule: String = "B3/S23",
+    ) : this(
+        rows = rows,
+        columns = columns,
+        birthRule = rule.toBirthRule(),
+        surviveRule = rule.toSurviveRule(),
+        initialPattern = initialPattern?.let { parsePattern(it) },
+    )
 
     fun update() {
         // n.b. if trying to avoid new Array allocation, be sure to not to update current grid for calculations
@@ -178,7 +178,7 @@ private fun parseRow(pRow: String): BooleanArray? {
     @Suppress("AvoidVarsExceptWithDelegate")
     var multiplier = 1
 
-    @Suppress("AvoidVarsExceptWithDelegate")
+    @Suppress("AvoidVarsExceptWithDelegate", "BooleanPropertyNaming")
     var prevWasDigit = false
     for (char in pRow) {
         when {
