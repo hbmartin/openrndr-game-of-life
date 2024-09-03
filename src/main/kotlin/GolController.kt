@@ -16,6 +16,9 @@ class GolController(
             centerPattern(it, rows, columns)
         } ?: randomGrid(rows, columns)
 
+    var generation: ULong = 0u
+        private set
+
     init {
         require(columns > 0) { "Columns must be greater than 0" }
         require(rows > 0) { "Rows must be greater than 0" }
@@ -26,14 +29,14 @@ class GolController(
     constructor(
         rows: Int,
         columns: Int,
-        initialPattern: String? = null,
+        initialPattern: String,
         rule: String = "B3/S23",
     ) : this(
         rows = rows,
         columns = columns,
         birthRule = rule.toBirthRule(),
         surviveRule = rule.toSurviveRule(),
-        initialPattern = initialPattern?.let { parsePattern(it) },
+        initialPattern = parsePattern(initialPattern),
     )
 
     fun update() {
@@ -51,6 +54,8 @@ class GolController(
                     }
                 }
             }
+
+        generation++
     }
 
     private fun countLiveNeighbours(
@@ -91,6 +96,7 @@ class GolController(
         }
 
     fun reset(pattern: Patterns?) {
+        generation = 0u
         grid =
             if (pattern != null) {
                 centerPattern(pattern.asArray, rows, columns)

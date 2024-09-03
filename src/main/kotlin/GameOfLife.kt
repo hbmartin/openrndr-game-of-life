@@ -22,6 +22,7 @@ fun main() =
 
         program {
             val vm = GolViewModel(ROWS, COLUMNS)
+            var lastRender = 0.0
 
             launch { vm.loopUpdate() }
 
@@ -37,13 +38,12 @@ fun main() =
                     }
                 }
 
-                writer {
-                    box = Rectangle(40.0, 40.0, 300.0, 300.0)
-                    newLine()
-                    text("Here is a line of text..")
-                    newLine()
-                    text("Here is another line of text..")
+                if (vm.settings.isInfoVisible) {
+                    val fps = 1 / (seconds - lastRender)
+                    drawer.text("Generation: ${vm.generation}, " + "FPS: %.0f".format(fps), 20.0, 20.0)
                 }
+
+                lastRender = seconds
             }
 
             extend(vm.gui)

@@ -5,6 +5,7 @@ import org.openrndr.Program
 import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.gui.GUI
 import org.openrndr.extra.parameters.ActionParameter
+import org.openrndr.extra.parameters.BooleanParameter
 import org.openrndr.extra.parameters.ColorParameter
 import org.openrndr.extra.parameters.Description
 import org.openrndr.extra.parameters.OptionParameter
@@ -30,6 +31,9 @@ class GolViewModel(
             initialPattern = pattern.value,
         )
 
+    val generation: ULong
+        get() = controller.generation
+
     val gui = GUI()
 
     val settings =
@@ -38,6 +42,9 @@ class GolViewModel(
         object : Settings {
             @ColorParameter("Background", order = 0)
             override var color = ColorRGBa.PINK
+
+            @BooleanParameter("Show Info", order = 1)
+            override var isInfoVisible = false
 
             @OptionParameter("\n", order = 99)
             var pattern: Patterns = DEFAULT_PATTERN
@@ -80,7 +87,6 @@ class GolViewModel(
             val targetPosition = event.position + event.dragDisplacement
             program.grid.each { rowIndex, colIndex, rect ->
                 if (rect.contains(event.position) || rect.contains(targetPosition)) {
-                    println("rowIndex: $rowIndex, colIndex: $colIndex")
                     controller.turnOnCell(rowIndex = rowIndex, colIndex = colIndex)
                 }
             }
@@ -105,6 +111,8 @@ class GolViewModel(
                     "." -> gui.visible = !gui.visible
                     "," -> gui.visible = !gui.visible
                     "r" -> controller.reset(Patterns.entries.random())
+                    "g" -> settings.isInfoVisible = !settings.isInfoVisible
+                    "f" -> settings.isInfoVisible = !settings.isInfoVisible
                 }
             }
         }
