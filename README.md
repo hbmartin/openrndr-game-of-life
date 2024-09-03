@@ -1,25 +1,30 @@
-# Conway's Game of Life implemented in OPENRNDR
+# Conway's Game of Life in Kotlin / OPENRNDR
 
 [![Build on commit](https://github.com/hbmartin/openrndr-game-of-life/actions/workflows/build-on-commit.yaml/badge.svg)](https://github.com/hbmartin/openrndr-game-of-life/actions/workflows/build-on-commit.yaml)
+[![CodeFactor](https://www.codefactor.io/repository/github/hbmartin/openrndr-game-of-life/badge)](https://www.codefactor.io/repository/github/hbmartin/openrndr-game-of-life)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=hbmartin_openrndr-game-of-life&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=hbmartin_openrndr-game-of-life)
 
-<img src=".idea/icon.svg" width="100" align="right">
+<img src=".idea/icon.svg" width="50" align="right">
 
-An implementation of Conway's Game of Life using OPENRNDR in Kotlin.
+An implementation of [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) using [OPENRNDR](https://openrndr.org/) in Kotlin.
 
+Inspired by [Golly](https://golly.sourceforge.io/) and the [Edwin Jakobs KotlinConf talk](https://www.youtube.com/watch?v=GysSoSwmLYo).
+
+<img src="media/screenshot.png" width="800">
 
 
 ## Controls
 - Draw on the canvas with a mouse to create new life
 - Scroll up and down to control generation time
 - Press space to pause / resume the simulation
-- Press 'esc' to reset current pattern to the initial state
-- Press 'r' to reset to a randomly chosen pattern
-- Press 'c' to reset to a random canvas
+- Press `esc` to reset current pattern to the initial state
+- Press `r` to reset to a randomly chosen pattern
+- Press `c` to reset to a random canvas
 - (TODO) Press 'g' to toggle grid visibility
-- Press 's' to save the current state to a file
+- Press `s` to save the current state to an RLE / Golly file
 - (TODO) Press 'l' to load a state from a file
-- Press 'i' to toggle info text (generation # and FPS)
-- Press 'q' to quit the program
+- Press `i` to toggle info text (generation # and FPS)
+- Press `q` to quit the program
 - (TODO) Press 'h' to show the help screen
 - (TODO) Press 'f' to toggle fullscreen mode
 
@@ -39,3 +44,6 @@ An implementation of Conway's Game of Life using OPENRNDR in Kotlin.
 
 To create a runnable jar for a platform different from your current platform, use `./gradlew jar -PtargetPlatform=<platform>`, where `<platform>` is either `windows`, `macos`, `linux-x64`, or `linux-arm64`. 
 
+## See also
+
+- [Another Openrndr GoL that I found too late](https://github.com/ikolomiets/openrndr-game-of-life)
