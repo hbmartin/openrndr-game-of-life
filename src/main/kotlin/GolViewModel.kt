@@ -9,6 +9,8 @@ import org.openrndr.extra.parameters.BooleanParameter
 import org.openrndr.extra.parameters.ColorParameter
 import org.openrndr.extra.parameters.Description
 import org.openrndr.extra.parameters.OptionParameter
+import java.io.File
+import java.time.Instant.now
 
 private const val DEFAULT_DELAY: Long = 200
 private const val DELAY_CHANGE_ON_SCROLL: Long = 50
@@ -110,9 +112,11 @@ class GolViewModel(
                 else -> when (it.name) {
                     "." -> gui.visible = !gui.visible
                     "," -> gui.visible = !gui.visible
+                    "c" -> controller.reset(null)
                     "r" -> controller.reset(Patterns.entries.random())
-                    "g" -> settings.isInfoVisible = !settings.isInfoVisible
-                    "f" -> settings.isInfoVisible = !settings.isInfoVisible
+                    "i" -> settings.isInfoVisible = !settings.isInfoVisible
+                    "s" -> File("gol-${now().toEpochMilli()}.rle").writeText(controller.toString())
+                    "q" -> program.application.exit()
                 }
             }
         }

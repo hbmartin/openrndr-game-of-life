@@ -16,6 +16,7 @@ class GolController(
             centerPattern(it, rows, columns)
         } ?: randomGrid(rows, columns)
 
+    @Suppress("AvoidVarsExceptWithDelegate")
     var generation: ULong = 0u
         private set
 

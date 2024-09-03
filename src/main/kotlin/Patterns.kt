@@ -1,3 +1,6 @@
+// This syntax follows the FOlly RLE format
+// https://golly.sourceforge.io/Help/formats.html
+
 enum class Patterns(
     internal val value: String,
 ) {

@@ -1,3 +1,4 @@
+*.rle
 application.log
 build
 out
