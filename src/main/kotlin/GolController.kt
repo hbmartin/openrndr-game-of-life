@@ -92,8 +92,8 @@ class GolController(
     operator fun get(coords: Pair<Int, Int>): Boolean = grid[coords.first][coords.second]
 
     override fun toString(): String =
-        grid.joinToString("$") {
-            it.joinToString("") { cell -> if (cell) "A" else "." }
+        grid.joinToString("$\n") {
+            it.compress()
         }
 
     fun reset(pattern: Patterns?) {
@@ -105,7 +105,43 @@ class GolController(
                 randomGrid(rows, columns)
             }
     }
+
+    fun reset(pattern: String) {
+        generation = 0u
+        grid = centerPattern(parsePattern(pattern), rows, columns)
+    }
 }
+
+@Suppress("AvoidVarsExceptWithDelegate")
+private fun BooleanArray.compress(): String {
+    if (this.isEmpty()) return ""
+
+    val result = StringBuilder()
+    var count = 1
+    var currentChar = this[0].asChar()
+
+    for (i in 1 until this.size) {
+        if (this[i].asChar() == currentChar) {
+            count++
+        } else {
+            if (count > 1) result.append(count)
+            result.append(currentChar)
+            currentChar = this[i].asChar()
+            count = 1
+        }
+    }
+
+    if (count > 1) result.append(count)
+    result.append(currentChar)
+
+    return result.toString()
+}
+
+private fun Boolean.asChar(): Char =
+    when (this) {
+        true -> 'A'
+        false -> '.'
+    }
 
 private fun String.toBirthRule(): BooleanArray {
     val rule = this.uppercase().substringAfter("B").substringBefore("/")
@@ -170,7 +206,7 @@ private fun wrappedIndex(
 // eg. A.A$3.A$3.A$A2.A$.3A!
 private fun parsePattern(pattern: String): Array<BooleanArray> {
     require(pattern.isNotEmpty()) { "Pattern cannot be empty" }
-    val illegalChar = pattern.find { it !in "Ao.b0123456789$!" }
+    val illegalChar = pattern.find { it !in "Ao.b0123456789$!\n" }
     @Suppress("NullableToStringCall")
     require(illegalChar == null) { "Illegal character in pattern: $illegalChar" }
     return pattern.split('$').mapNotNull { parseRow(it) }.toTypedArray()
