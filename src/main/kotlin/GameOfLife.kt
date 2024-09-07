@@ -44,12 +44,10 @@ fun main() =
                     val fps = 1 / (seconds - lastRender)
                     drawer.text(
                         text =
-                            (
-                                "Generation: ${vm.generation}, " +
-                                    "Compute ms: ${vm.lastGenerationTime}, " +
-                                    "Expected ms: ${vm.delayTimeMillis}, " +
-                                    "FPS: %.0f".format(fps)
-                            ),
+                        "Generation: ${vm.generation}, " +
+                            "Compute ms: ${vm.lastGenerationTime}, " +
+                            "Expected ms: ${vm.delayTimeMillis}, " +
+                            "FPS: %.0f".format(fps),
                         x = INFO_TEXT_POS,
                         y = INFO_TEXT_POS,
                     )

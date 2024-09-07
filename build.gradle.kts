@@ -4,7 +4,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "me.haroldmartin.gameoflife"
-version = "1.0.0"
+version = "1.0.1"
 
 val applicationMainClass = "GameOfLifeKt"
 

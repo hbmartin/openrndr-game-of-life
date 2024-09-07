@@ -112,6 +112,7 @@ class GolController(
     }
 }
 
+@Suppress("AvoidVarsExceptWithDelegate")
 private fun BooleanArray.compress(): String {
     if (this.isEmpty()) return ""
 
@@ -136,10 +137,11 @@ private fun BooleanArray.compress(): String {
     return result.toString()
 }
 
-private fun Boolean.asChar(): Char = when(this) {
-    true -> 'A'
-    false -> '.'
-}
+private fun Boolean.asChar(): Char =
+    when (this) {
+        true -> 'A'
+        false -> '.'
+    }
 
 private fun String.toBirthRule(): BooleanArray {
     val rule = this.uppercase().substringAfter("B").substringBefore("/")

@@ -66,8 +66,8 @@ class GolViewModel(
         gui.compartmentsCollapsedByDefault = false
         gui.add(settings)
         gui.onChange { _, value ->
-            (value as? Patterns)?.let {
-                pattern = it
+            (value as? Patterns)?.let { newPat ->
+                pattern = newPat
                 controller.reset(pattern)
             }
         }
@@ -136,9 +136,10 @@ class GolViewModel(
         while (true) {
             if (delayTimeMillis > 0) {
                 delay(delayTimeMillis)
-                lastGenerationTime = measureTimeMillis {
-                    controller.update()
-                }
+                lastGenerationTime =
+                    measureTimeMillis {
+                        controller.update()
+                    }
             } else {
                 @Suppress("MagicNumber")
                 delay(250L)
